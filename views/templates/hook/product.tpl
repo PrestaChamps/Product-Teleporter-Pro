@@ -21,21 +21,25 @@
     </div>
     <div class="panel-body">
         {foreach $shops as $shop}
-            <a class="btn btn-primary btn-teleport {if $product->isAssociatedToShop($shop.id_shop)}associated{/if}"
-               data-shop="{$shop.id_shop}" data-product="{$product->id}">
-                <i class="icon icon-check"></i>
-                {$shop.name}
-            </a>
+            {*<a class="btn btn-primary btn-teleport {if $product->isAssociatedToShop($shop.id_shop)}associated{/if}"*}
+               {*data-shop="{$shop.id_shop}" data-product="{$product->id}">*}
+                {*<i class="icon icon-check"></i>*}
+                {*{$shop.name}*}
+            {*</a>*}
+            <div class="btn-group" role="group" aria-label="{$shop.name}">
+                <a type="button" data-shop="{$shop.id_shop}" data-product="{$product->id}" data-method="remove"
+                        class="btn btn-success btn-teleport">
+                    <i class="icon-minus"></i>
+                </a>
+                <a type="button" data-shop="{$shop.id_shop}" data-product="{$product->id}" class="btn btn-default"
+                        disabled>
+                    {$shop.name}
+                </a>
+                <a type="button" data-shop="{$shop.id_shop}" data-product="{$product->id}" data-method="add"
+                        class="btn btn-warning btn-teleport">
+                    <i class="icon-plus"></i>
+                </a>
+            </div>
         {/foreach}
     </div>
 </div>
-
-<style>
-    .btn-teleport i {
-        display: none;
-    }
-
-    .btn-teleport.associated i {
-        display: inline-block;
-    }
-</style>

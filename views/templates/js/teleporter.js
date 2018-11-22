@@ -20,12 +20,14 @@ $(document).ready(function () {
     $(document).on('click', '.btn-teleport', function (event) {
         var productId = $(this).data('product');
         var shopId = $(this).data('shop');
+        var method = $(this).data('method');
         var element = $(this);
         $.ajax({
             url: teleportUrl,
             data: {
                 shopId: shopId,
-                productId: productId
+                productId: productId,
+                method: method
             },
             success: function (result) {
                 if (result.associated) {
