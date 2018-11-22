@@ -1,0 +1,23 @@
+{
+    "name": "productteleporterpro",
+    "description": "Et suscipit modi quia. Unde vitae cumque occaecati sunt dolorem. Consequatur quis soluta eveniet.",
+    "type": "project",
+    "license": "Commercial",
+    "authors": [
+        {
+            "name": "Zoltan Szanto",
+            "email": "zoli@prestachamps.com"
+        }
+    ],
+    "require": {
+
+    },
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        },
+        "files": [
+            "src/ProductTeleporterProConfig.php"
+        ]
+    }
+}

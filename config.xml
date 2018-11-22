@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>productteleporterpro</name>
+	<displayName><![CDATA[Product Teleporter Pro]]></displayName>
+	<version><![CDATA[0.0.1]]></version>
+	<description><![CDATA[Do what I do. Hold tight and pretend it&rsquo;s a plan!]]></description>
+	<author><![CDATA[PrestaChamps]]></author>
+	<tab><![CDATA[administration]]></tab>
+	<confirmUninstall><![CDATA[Are you sure you want to uninstall this awesome module?]]></confirmUninstall>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+	<limited_countries></limited_countries>
+</module>
