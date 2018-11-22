@@ -44,7 +44,7 @@ class Productteleporterpro extends Module
         $this->description = $this->l('Do what I do. Hold tight and pretend it’s a plan!');
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall this awesome module?');
         $this->ps_versions_compliancy = ['min' => '1.6', 'max' => _PS_VERSION_];
-//        require_once $this->getLocalPath() . "vendor/autoload.php";
+        require_once $this->getLocalPath() . "vendor/autoload.php";
     }
 
 
