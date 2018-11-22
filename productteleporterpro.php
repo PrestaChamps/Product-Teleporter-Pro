@@ -24,7 +24,6 @@ class Productteleporterpro extends Module
             'name' => 'Teleport',
             'class_name' => 'AdminTeleport',
             'visible' => false,
-            'parent_class_name' => 'AdminProducts',
         ],
     ];
 
@@ -62,25 +61,28 @@ class Productteleporterpro extends Module
     {
 
         parent::install();
-        /**
-         * Create tabs for retro-compatibility
-         */
-        $langs = \Language::getLanguages();
-        foreach ($this->tabs as $tabItem) {
+        if (!self::isPs17()) {
+            /**
+             * Create tabs for retro-compatibility
+             */
+            $langs = \Language::getLanguages();
+            foreach ($this->tabs as $tabItem) {
 
-            $tabNameMultiLang = [];
-            foreach ($langs as $language) {
-                $tabNameMultiLang[(int)$language['id_lang']] = $tabItem['name'];
+                $tabNameMultiLang = [];
+                foreach ($langs as $language) {
+                    $tabNameMultiLang[(int)$language['id_lang']] = $tabItem['name'];
+                }
+
+                $tab = new Tab();
+                $tab->name = $tabNameMultiLang;
+                $tab->class_name = $tabItem['class_name'];
+                $tab->id_parent = 0;
+                $tab->module = $this->name;
+
+                $tab->position = 0;
+                $tab->active = $tabItem['visible'] ? 1 : 0;
+                $tab->save();
             }
-
-            $tab = new Tab(1);
-            $tab->name = $tabNameMultiLang;
-            $tab->class_name = $tabItem['class_name'];
-            $tab->id_parent = 0;
-            $tab->module = $this->name;
-            $tab->position = 0;
-            $tab->active = $tabItem['visible'] ? 1 : 0;
-            $tab->save();
         }
         $this->registerHook('actionAdminControllerSetMedia');
         $this->registerHook('actionProductUpdate');
@@ -101,14 +103,6 @@ class Productteleporterpro extends Module
     }
 
     /**
-     * Redirect to the custom config controller
-     */
-    public function getContent()
-    {
-        Tools::redirectAdmin($this->context->link->getAdminLink('AdminProductteleporterproConfig', true));
-    }
-
-    /**
      *
      */
     public function hookDisplayBackOfficeHeader()
@@ -121,7 +115,7 @@ class Productteleporterpro extends Module
             $this->context->controller->addJquery();
             $this->context->controller->addJS('https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js');
             $this->context->controller->addCSS('https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css');
-            $this->context->controller->addJS('/modules/productteleporterpro/views/templates/js/teleporter.js',false);
+            $this->context->controller->addJS($this->getLocalPath() . '/views/templates/js/teleporter.js');
         }
     }
 
@@ -134,12 +128,13 @@ class Productteleporterpro extends Module
      */
     public function hookDisplayAdminProductsExtra($params)
     {
-        ;
-        if (Validate::isLoadedObject($product = new Product((int)Tools::getValue('id_product')))) {
+        $productId = isset($params['id_product']) ? $params['id_product'] : Tools::getValue('id_product');
+        if (Validate::isLoadedObject($product = new Product($productId))) {
             $shops = Shop::getShops(false);
             $this->smarty->assign([
                 'shops' => $shops,
                 'product' => $product,
+                'is17' => self::isPs17()
             ]);
 
             return $this->display(__FILE__, 'product.tpl');

@@ -57,7 +57,7 @@ class TeleporterService
      */
     public function associate()
     {
-        $this->product->associateTo($this->shop->id);
+        $this->associateObjectModel($this->product);
         $this->associateImages();
         $this->associateCombinations();
         return true;
@@ -103,7 +103,7 @@ class TeleporterService
     protected function associateImages()
     {
         foreach ($this->getImages() as $image) {
-            $image->associateTo($this->shop->id);
+            $this->associateObjectModel($image);
         }
     }
 
@@ -134,7 +134,7 @@ class TeleporterService
     protected function associateCombinations()
     {
         foreach ($this->getCombinations() as $combination) {
-            $combination->associateTo($this->shop->id);
+            $this->associateObjectModel($combination);
         }
     }
 
@@ -153,5 +153,37 @@ class TeleporterService
         $query->where("id_product = {$this->product->id}");
 
         return \Combination::hydrateCollection(\Combination::class, Db::getInstance()->executeS($query));
+    }
+
+    /**
+     * @param \ObjectModel $object
+     *
+     * @return bool
+     * @throws PrestaShopDatabaseException
+     */
+    private function associateObjectModel(\ObjectModel $object)
+    {
+        $reflection = new \ReflectionObject($object);
+        $property = $reflection->getStaticPropertyValue('definition');
+
+        if (!$object->id) {
+            return false;
+        }
+        $data = [];
+        $definition = $property;
+        if (!$object->isAssociatedToShop($this->shop->id)) {
+            foreach ($definition['fields'] as $field => $fieldOptions) {
+                if (isset($fieldOptions['shop']) && $fieldOptions['shop'] === true) {
+                    $data[$field] = $object->$field;
+                }
+            }
+            $data[$definition['primary']] = (int)$object->id;
+            $data['id_shop'] = $this->shop->id;
+            if ($data) {
+                return Db::getInstance()->insert($definition['table'] . '_shop', $data);
+            }
+        }
+
+        return true;
     }
 }
