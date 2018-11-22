@@ -1,6 +1,6 @@
 {
   "name": "productteleporterpro",
-  "description": "Et suscipit modi quia. Unde vitae cumque occaecati sunt dolorem. Consequatur quis soluta eveniet.",
+  "description": "Do what I do. Hold tight and pretend it’s a plan!",
   "type": "project",
   "license": "Commercial",
   "authors": [
@@ -17,6 +17,25 @@
     },
     "files": [
       "src/ProductTeleporterProConfig.php"
+    ]
+  },
+  "scripts": {
+    "mk-build-dir": "rm -f productteleporterpro.zip && rm -rf build/* && mkdir -p build",
+    "copy-build-dir": "rsync -rv --exclude=build --exclude='.php_cs' --exclude='bin' --exclude=code-report --exclude='.editorconfig' --exclude='.DS_Store' --exclude='index-creator.php' --exclude=vendor --exclude=.php_cs.cache --exclude=.git --exclude=bitbucket-pipelines.yml --exclude=build.sh --exclude=config.xml --exclude=.gitignore --exclude=fontello-config.json . build",
+    "cs-fix": "php-cs-fixer fix --allow-risky yes",
+    "composer-install": "cd build && composer install --no-dev && composer dump-autoload",
+    "clean-build-dir": "cd build && rm -f composer.json && rm -f composer.lock && rm -rf vendor/bower-asset",
+    "make-zip": "mv build productteleporterpro && mkdir -p build && zip -r -D \"build/productteleporterpro-latest.zip\" 'productteleporterpro' && rm -rf productteleporterpro && ln  build/productteleporterpro-latest.zip \"build/productteleporterpro-$(git describe --tags)-$(date +\"%s\").zip\" ",
+    "index-creator": "cd bin && php -f index-creator.php",
+    "build": [
+      "@mk-build-dir",
+      "@copy-build-dir",
+      "@cs-fix",
+      "@composer-install",
+      "@clean-build-dir",
+      "@index-creator",
+
+      "@make-zip"
     ]
   }
 }
