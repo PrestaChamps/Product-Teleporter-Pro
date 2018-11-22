@@ -66,10 +66,4 @@ class AdminTeleportController extends ModuleAdminController
         $value = json_encode($value);
         parent::ajaxDie($value, $controller, $method);
     }
-
-
-    protected function getProductImages()
-    {
-
-    }
 }
