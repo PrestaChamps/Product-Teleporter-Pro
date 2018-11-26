@@ -22,6 +22,7 @@ namespace PrestaChamps\ProductTeleporter\Services;
 use \Db;
 use \Shop;
 use \Image;
+use \Context;
 use \Product;
 use PrestaShopDatabaseException;
 
@@ -42,10 +43,16 @@ class TeleporterService
      */
     protected $shop;
 
-    public function __construct(Product $product, Shop $shop)
+    /**
+     * @var Context $context
+     */
+    protected $context;
+
+    public function __construct(Product $product, Shop $shop, Context $context)
     {
         $this->product = $product;
         $this->shop = $shop;
+        $this->context = $context;
     }
 
     /**
@@ -102,8 +109,20 @@ class TeleporterService
      */
     protected function associateImages()
     {
+
         foreach ($this->getImages() as $image) {
-            $this->associateObjectModel($image);
+            Db::getInstance()->insert(
+                'image_shop',
+                [
+                    'id_product' => $image->id_product,
+                    'id_image' => $image->id,
+                    'id_shop' => $this->shop->id,
+                    'cover' => (int)$image->cover,
+                ],
+                false,
+                false,
+                Db::INSERT_IGNORE
+            );
         }
     }
 
@@ -119,9 +138,9 @@ class TeleporterService
 
     protected function dissociateCombinations()
     {
-        $table = _DB_PREFIX_ . 'product_attribute_shop';
-        return Db::getInstance()->execute(
-            "DELETE FROM `{$table}` WHERE " .
+        $table = 'product_attribute_shop';
+        return Db::getInstance()->delete(
+            $table,
             "`id_product` = {$this->product->id} AND" .
             "`id_shop` = {$this->shop->id}"
         );
@@ -158,32 +177,49 @@ class TeleporterService
     /**
      * @param \ObjectModel $object
      *
-     * @return bool
      * @throws PrestaShopDatabaseException
      */
     private function associateObjectModel(\ObjectModel $object)
     {
+
         $reflection = new \ReflectionObject($object);
         $property = $reflection->getStaticPropertyValue('definition');
 
         if (!$object->id) {
-            return false;
+            throw new \InvalidParameterException('Object does not exists in DB');
         }
         $data = [];
         $definition = $property;
-        if (!$object->isAssociatedToShop($this->shop->id)) {
-            foreach ($definition['fields'] as $field => $fieldOptions) {
-                if (isset($fieldOptions['shop']) && $fieldOptions['shop'] === true) {
-                    $data[$field] = $object->$field;
+
+        $fields = $this->getTableFields(_DB_PREFIX_ . $definition['table'] . '_shop');
+
+        if (true || !$object->isAssociatedToShop($this->shop->id)) {
+
+            $values = $object->getFieldsShop();
+            foreach ($fields as $field) {
+                if (property_exists($object, $field) && isset($values[$field])) {
+
+                    $data[$field] = $values[$field];
+
+                    if (!is_scalar($data[$field])) {
+                        unset($data[$field]);
+                    }
                 }
             }
             $data[$definition['primary']] = (int)$object->id;
             $data['id_shop'] = $this->shop->id;
             if ($data) {
-                return Db::getInstance()->insert($definition['table'] . '_shop', $data);
+                $tableName = (strpos($definition['table'], '_shop') === false) ?
+                    $definition['table'] . '_shop' : $definition['table'];
+                if (!Db::getInstance()->insert($tableName, $data)) {
+                    throw new \Exception("Can't save associate mode");
+                }
             }
         }
+    }
 
-        return true;
+    private function getTableFields($tableName)
+    {
+        return array_column(Db::getInstance()->executeS("DESCRIBE $tableName"), 'Field');
     }
 }

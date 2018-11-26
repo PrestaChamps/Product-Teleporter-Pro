@@ -34,10 +34,10 @@ class AdminTeleportController extends ModuleAdminController
         try {
             $productId = Tools::getValue('productId');
             $shopId = Tools::getValue('shopId');
-            $product = new Product($productId);
+            $product = new Product($productId, false, null, $this->context->shop->id);
             $shop = new Shop($shopId);
             if (Validate::isLoadedObject($product) && Validate::isLoadedObject($shop)) {
-                $teleporter = new TeleporterService($product, $shop);
+                $teleporter = new TeleporterService($product, $shop, $this->context);
                 if (Tools::getValue('method') === 'remove') {
                     $result = $teleporter->dissociate();
                     $message = $this->module->l("Product removed from shop {$shop->name}");
@@ -56,7 +56,13 @@ class AdminTeleportController extends ModuleAdminController
                 throw new InvalidArgumentException('Unknown product or shop');
             }
         } catch (\Exception $exception) {
-            $this->ajaxDie(['success' => false, 'message' => $exception->getMessage()]);
+            $this->ajaxDie([
+                'success' => false,
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'trace' => $exception->getTrace()
+            ]);
         }
     }
 
