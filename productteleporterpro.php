@@ -131,13 +131,13 @@ class Productteleporterpro extends Module
         $productId = isset($params['id_product']) ? $params['id_product'] : Tools::getValue('id_product');
         if (Validate::isLoadedObject($product = new Product($productId))) {
             $shops = Shop::getShops(false);
-            $enabledforshops =  $product->getAssociatedShops();
+            $associatedShops =  $product->getAssociatedShops();
 
             $this->smarty->assign(array(
                 'shops' => $shops,
                 'product' => $product,
                 'is17' => self::isPs17(),
-                'enabledforshops' => $enabledforshops,
+                'associatedShops' => $associatedShops,
             ));
 
             return $this->display(__FILE__, 'product.tpl');

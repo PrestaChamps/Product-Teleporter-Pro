@@ -34,7 +34,7 @@
             {*</a>*}
 
             {assign var="EnabledForThisShop" value="0"}
-            {foreach $enabledforshops as $thisshop}
+            {foreach $associatedShops as $thisshop}
                 {if $thisshop ==  $shop.id_shop}
                     {$EnabledForThisShop = 1}
                 {/if}
