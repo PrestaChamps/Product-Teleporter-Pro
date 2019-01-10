@@ -126,16 +126,19 @@ class Productteleporterpro extends Module
      * @throws PrestaShopDatabaseException
      * @throws PrestaShopException
      */
-    public function hookDisplayAdminProductsExtra($params)
+   public function hookDisplayAdminProductsExtra($params)
     {
         $productId = isset($params['id_product']) ? $params['id_product'] : Tools::getValue('id_product');
         if (Validate::isLoadedObject($product = new Product($productId))) {
             $shops = Shop::getShops(false);
-            $this->smarty->assign([
+            $enabledforshops =  $product->getAssociatedShops();
+
+            $this->smarty->assign(array(
                 'shops' => $shops,
                 'product' => $product,
-                'is17' => self::isPs17()
-            ]);
+                'is17' => self::isPs17(),
+                'enabledforshops' => $enabledforshops,
+            ));
 
             return $this->display(__FILE__, 'product.tpl');
         }
